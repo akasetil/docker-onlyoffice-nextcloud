@@ -1,115 +1,126 @@
 ## Document Server and Nextcloud Docker installation
 
-Document Server and Nextcloud Docker installation will install the preconfigured version of [ONLYOFFICE Document Server][2] connected to Nextcloud to your server running them in Docker containers.
+[元リポジトリ](https://github.com/ONLYOFFICE/docker-onlyoffice-nextcloud)
 
-## Requirements
 
-* The latest version of Docker (can be downloaded here: [https://docs.docker.com/engine/installation/](https://docs.docker.com/engine/installation/))
-* Docker compose (can be downloaded here: [https://docs.docker.com/compose/install/](https://docs.docker.com/compose/install/))
+## 起動手順
 
-## Installation
+### 初期設定
 
-1. Get the latest version of this repository running the command:
+```bash
+$ export MYSQL_ROOT_PASSWORD=hogehoge
+$ export MYSQL_PASSWORD=hogehoge
+$ export maildomain=hoge.com
+$ export smtp_user=hogehoge:hogehoge
+$ cat docker-compose-template.yml | envsubst > docker-compose.yml
+```
 
-    ```
-    git clone https://github.com/ONLYOFFICE/docker-onlyoffice-nextcloud
-    cd docker-onlyoffice-nextcloud
-    ```
+### 起動
 
-2. Run Docker Compose:
+```bash
+$ docker-compose up -d
+```
 
-    ```
-    docker-compose up -d
-    ```
+#### s3を保存場所にする場合
 
-    **Please note**: you might need to wait a couple of minutes when all the containers are up and running after the above command.
+この段階で、configを設定してs3にあげるようにしてください  
+adminユーザ作成後に変更した場合、自分の環境ではうまく行きませんでした。
 
-3. Now launch the browser and enter the webserver address. The Nextcloud wizard webpage will be opened. Enter all the necessary data to complete the wizard.
+事前にs3バケットを作成し、そのバケットのフルアクセス権限をもつIAMユーザーを作成する(IAMロールだとできなかった)
 
-4. Go to the project folder and run the `set_configuration.sh` script:
+```bash
+$ sudo vi /var/lib/docker/volumes/docker-onlyoffice-nextcloud_app_data/_data/config/config.php
+```
 
-    ```
-    bash set_configuration.sh
-    ```
+```php
+  'objectstore' =>
+  array (
+    'class' => 'OC\\Files\\ObjectStore\\S3',
+    'arguments' =>
+    array (
+      'bucket' => '',
+      'autocreate' => true,
+      'key'    =>  '...',
+      'secret' => '...',
+      'region' => 'ap-northeast-1',
+      'use_ssl' => false,
+      'use_path_style' => false,
+    ),
+  ),
+```
 
-Now you can enter Nextcloud and create a new document. It will be opened in ONLYOFFICE Document Server.
 
-## ONLYOFFICE Document Server editions
 
-Here we offer you to deploy ownCloud with preconfigured free version of ONLYOFFICE Document Server. Note that there’re commercial versions of it. 
+### adminユーザー作成
 
-**ONLYOFFICE Document Server:**
+http://<動作しているサーバ>  
+にアクセスすると、初期設定画面が表示されますされます
 
-* Community Edition (`onlyoffice-documentserver` package)
+adminユーザのusername, passwordを設定後
 
-* Integration Edition (`onlyoffice-documentserver-ie` package)
+データベース種別をMySQLにし、以下のように設定する  
+パスワードは先ほど環境変数で指定したもの、その他は以下の画像と同じで良い
 
-The table below will help you make the right choice.
+![image](https://user-images.githubusercontent.com/58157624/69805922-15612780-1225-11ea-9de9-e3f0aacd5b49.png)
 
-| Pricing and licensing | Community Edition | Integration Edition |
-| ------------- | ------------- | ------------- |
-| | [Get it now](https://www.onlyoffice.com/download.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDockerNC)  | [Start Free Trial](https://www.onlyoffice.com/connectors-request.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDockerNC)  |
-| Cost  | FREE  | [Go to the pricing page](https://www.onlyoffice.com/integration-edition-prices.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDockerNC)  |
-| Simultaneous connections | up to 20 maximum  | As in chosen pricing plan |
-| Number of users | up to 20 recommended | As in chosen pricing plan |
-| License | GNU AGPL v.3 | Proprietary |
-| **Support** | **Community Edition** | **Integration Edition** | 
-| Documentation | [Help Center](https://helpcenter.onlyoffice.com/server/docker/opensource/index.aspx) | [Help Center](https://helpcenter.onlyoffice.com/server/integration-edition/index.aspx) |
-| Standard support | [GitHub](https://github.com/ONLYOFFICE/DocumentServer/issues) or paid | One year support included |
-| Premium support | [Buy Now](https://www.onlyoffice.com/support.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDockerNC) | [Buy Now](https://www.onlyoffice.com/support.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDockerNC) |
-| **Services** | **Community Edition** | **Integration Edition** | 
-| Conversion Service                | + | + | 
-| Document Builder Service          | + | + | 
-| **Interface** | **Community Edition** | **Integration Edition** |
-| Tabbed interface                       | + | + |
-| White Label                            | - | - |
-| Integrated test example (node.js)     | - | + |
-| **Plugins & Macros** | **Community Edition** | **Integration Edition** |
-| Plugins                           | + | + |
-| Macros                            | + | + |
-| **Collaborative capabilities** | **Community Edition** | **Integration Edition** |
-| Two co-editing modes              | + | + |
-| Comments                          | + | + |
-| Built-in chat                     | + | + |
-| Review and tracking changes       | + | + |
-| Display modes of tracking changes | + | + |
-| Version history                   | + | + |
-| **Document Editor features** | **Community Edition** | **Integration Edition** |
-| Font and paragraph formatting   | + | + |
-| Object insertion                | + | + |
-| Content control                 | + | + |
-| Layout tools                    | + | + |
-| Table of contents               | + | + |
-| Navigation panel                | + | + |
-| Mail Merge                      | + | + |
-| **Spreadsheet Editor features** | **Community Edition** | **Integration Edition** |
-| Font and paragraph formatting   | + | + |
-| Object insertion                | + | + |
-| Functions, formulas, equations  | + | + |
-| Table templates                 | + | + |
-| Pivot tables                    | +* | +* |
-| **Presentation Editor features** | **Community Edition** | **Integration Edition** |
-| Font and paragraph formatting   | + | + |
-| Object insertion                | + | + |
-| Animations                      | + | + |
-| Presenter mode                  | + | + |
-| Notes                           | + | + |
-| | [Get it now](https://www.onlyoffice.com/download.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDockerNC)  | [Start Free Trial](https://www.onlyoffice.com/connectors-request.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDockerNC)  |
 
-*Changing style and deleting (Full support coming soon)
+### documet-server設定
 
-## Project Information
+正常にadminログインされたら、以下を実行する
 
-Official website: [https://www.onlyoffice.com/](https://www.onlyoffice.com/?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDockerNC)
+```bash
+$ pwd
+/home/ec2-user/docker-onlyoffice-nextcloud
 
-Code repository: [https://github.com/ONLYOFFICE/docker-onlyoffice-nextcloud](https://github.com/ONLYOFFICE/docker-onlyoffice-nextcloud "https://github.com/ONLYOFFICE/docker-onlyoffice-nextcloud")
+$ ./set_configuration.sh
+```
 
-Integration Edition: [http://www.onlyoffice.com/connectors-nextcloud.aspx](https://www.onlyoffice.com/connectors-nextcloud.aspx?utm_source=github&utm_medium=cpc&utm_campaign=GitHubDockerNC)
+正常にインストールされたら、新しいドキュメント作成時にWordなどが選べるようになる
 
-## User Feedback and Support
+![image](https://user-images.githubusercontent.com/58157624/69806344-fdd66e80-1225-11ea-90a8-29750f0bfc13.png)
 
-If you have any problems with or questions about [ONLYOFFICE Document Server][2], please visit our official forum to find answers to your questions: [dev.onlyoffice.org][1] or you can ask and answer ONLYOFFICE development questions on [Stack Overflow][3].
+選ぶと、onlyofficeで編集できる
 
-  [1]: http://dev.onlyoffice.org
-  [2]: https://github.com/ONLYOFFICE/DocumentServer
-  [3]: http://stackoverflow.com/questions/tagged/onlyoffice
+![image](https://user-images.githubusercontent.com/58157624/69806380-0e86e480-1226-11ea-901e-cf168446a55d.png)
+
+
+## その他設定
+
+### ユーザーが各自でsign upできるように
+
+毎回管理者がユーザー登録はめんどい。使いたいユーザーが自分でアカウントを作れるように  
+[Registration](https://github.com/pellaeon/registration)というアプリを入れるとこれが実現できる
+
+インストールすると、設定に`追加設定`というメニューが表示される  
+ここで、デフォで属するグループと、登録を許可するメールドメインを指定できる
+
+また、sign upにメール認証を行うので、メールサーバへの接続設定が必要  
+設定->基本設定->メールサーバで以下のように設定する
+
+![image](https://user-images.githubusercontent.com/58157624/69806768-ff546680-1226-11ea-8aae-0403cc0aceac.png)
+
+メールドメイン, username:passwordは、docker-composeで環境変数で指定したものを設定する
+
+
+### ユーザーで共有のフォルダが欲しい
+
+[Group folders](https://github.com/nextcloud/groupfolders)でできるよ  
+特に設定は不要(グループの準備くらい)  
+インストールすると、設定画面に共有フォルダのメニューがでる
+
+
+### ユーザーのデフォルトファイルを削除
+
+以下のフォルダに置かれるファイルが、ユーザー作成時に配置される  
+邪魔なので消しておく
+
+```bash
+$ sudo ls /var/lib/docker/volumes/docker-onlyoffice-nextcloud_app_data/_data/core/skeleton
+Documents  Nextcloud Manual.pdf  Nextcloud intro.mp4  Nextcloud.png  Photos
+
+$ sudo -i
+$ cd /var/lib/docker/volumes/docker-onlyoffice-nextcloud_app_data/_data/core/skeleton
+$ rm -rf ./*
+```
+
+
