@@ -2,6 +2,15 @@
 
 [元リポジトリ](https://github.com/ONLYOFFICE/docker-onlyoffice-nextcloud)
 
+## AWS使った構成図
+
+![hoge 001](https://user-images.githubusercontent.com/58157624/69810763-f4ea9a80-122f-11ea-8428-6b7afe62653c.png)
+
+## Docker-composeの詳細
+
+![hoge 002](https://user-images.githubusercontent.com/58157624/69810764-f4ea9a80-122f-11ea-938c-eb62f79fd5a4.png)
+
+
 
 ## 起動手順
 
